@@ -30,6 +30,7 @@ class AlienInvasion:
         # Create an instance to store game statistics,
         #   and create a scoreboard.
         self.stats = GameStats(self)
+        self._load_score_file()
         self.sb = Scoreboard(self)
 
         self.ship = Ship(self)
@@ -45,7 +46,6 @@ class AlienInvasion:
         """Start the main loop for the game."""
         while True:
             self._check_events()
-
             if self.stats.game_active:
                 self.ship.update()
                 self._update_bullets()
@@ -57,6 +57,7 @@ class AlienInvasion:
         """Respond to keypresses and mouse events."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                self._save_score_file()
                 sys.exit()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
@@ -98,6 +99,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
+            self._save_score_file()
             sys.exit()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
@@ -256,6 +258,18 @@ class AlienInvasion:
                 # Treat this the same as if the ship got hit.
                 self._ship_hit()
                 break
+
+    def _save_score_file(self):
+        """Take the high score and save it to a text file."""
+        with open(".highscore.txt", "w") as f:
+            f.write(str(self.stats.high_score))
+
+    def _load_score_file(self):
+        try:
+            with open(".highscore.txt", "r") as f:
+                self.stats.high_score = int(f.read())
+        except FileNotFoundError:
+            return
 
 
 if __name__ == "__main__":
